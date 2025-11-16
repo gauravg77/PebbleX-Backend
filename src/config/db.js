@@ -1,26 +1,31 @@
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://ghimiregaurav357:ghimiregaurav%40357_@pebblexapi.dpxdbbo.mongodb.net/?appName=PebblexAPI";
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
+const uri = process.env.MONGO_URI || "mongodb+srv://ghimiregaurav357:ghimiregaurav%40357_@pebblexapi.dpxdbbo.mongodb.net/?appName=PebblexAPI";
 
-async function run() {
+let client;
+
+async function connectDB() {
+  if (client) return client;
+
+  client = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
+
   try {
-    // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
+    await client.db('admin').command({ ping: 1 });
+    console.log('MongoDB connected successfully');
+    return client;
+  } catch (err) {
+    client = null;
+    console.error('MongoDB connection error:', err);
+    throw err;
   }
 }
-run().catch(console.dir);
+
+module.exports = { connectDB };

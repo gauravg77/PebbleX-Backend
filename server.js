@@ -1,7 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const connectDB = require("./src/config/db");
+// Before: const connectDB = require("./src/config/db");
+const dbModule = require("./src/config/db");
+console.log('db module export:', dbModule);
+const { connectDB } = dbModule;
+const { notFound, errorHandler } = require("./src/middleware/errorMiddleware"); // <-- Import added
 
 dotenv.config();
 const app = express();
@@ -12,8 +16,13 @@ app.use(express.json());
 connectDB();
 
 // Routes
-const authRoutes = require("./src/routes/authRoutes");
+const authRoutes = require("./src/routes/userRoutes");
 app.use("/api/auth", authRoutes);
+// **********************************************************
+// ERROR MIDDLEWARE (MUST be placed after routes) <-- Added Error Middleware
+app.use(notFound);
+app.use(errorHandler);
+// **********************************************************
 
 // Server start
 const PORT = process.env.PORT || 5000;
