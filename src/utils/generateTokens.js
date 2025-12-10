@@ -1,5 +1,5 @@
 // src/utils/generateToken.js
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
 const generateToken = (id) => {
   // Use the secret key defined in your .env file
@@ -8,4 +8,4 @@ const generateToken = (id) => {
   });
 };
 
-module.exports = generateToken;
+export default generateToken;

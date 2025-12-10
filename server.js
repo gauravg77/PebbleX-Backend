@@ -1,29 +1,34 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-// Before: const connectDB = require("./src/config/db");
-const dbModule = require("./src/config/db");
-console.log('db module export:', dbModule);
-const { connectDB } = dbModule;
-const { notFound, errorHandler } = require("./src/middleware/errorMiddleware"); // <-- Import added
-
-dotenv.config();
+import express from 'express';
 const app = express();
-app.use(cors());
+
+import { config } from 'dotenv';
+config();
+const port = process.env.PORT || 5000;
+import  { connecttoMongoDB } from './connect.js';
+
+
+import userRoutes from './src/routes/userRoutes.js';
+
+
 app.use(express.json());
 
-// DB connect
-connectDB();
+
+
 
 // Routes
-const authRoutes = require("./src/routes/userRoutes");
-app.use("/api/auth", authRoutes);
-// **********************************************************
-// ERROR MIDDLEWARE (MUST be placed after routes) <-- Added Error Middleware
-app.use(notFound);
-app.use(errorHandler);
-// **********************************************************
+app.use('/api/v1', userRoutes);
 
-// Server start
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// MongoDB connection
+connecttoMongoDB(process.env.MONGODB_URL)
+    .then(() => {
+        console.log('MongoDB connected successfully');
+    })
+    .catch(err => {
+        console.error('MongoDB connection failed:', err);
+    });
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});

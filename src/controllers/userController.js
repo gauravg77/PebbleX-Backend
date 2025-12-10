@@ -1,7 +1,7 @@
 // src/controllers/userController.js
-const asyncHandler = require('express-async-handler');
-const User = require('../models/user'); // User model
-const generateToken = require('../utils/generateTokens');
+import asyncHandler from 'express-async-handler';
+import User from '../models/user.js'; // User model
+import generateToken from '../utils/generateTokens.js';
 
 // @desc    Register a new user (Supplier or Vendor)
 // @route   POST /api/users/register
@@ -39,6 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
       email: user.email,
       role: user.role,
       token: generateToken(user._id),
+      message: 'User registered successfully',
     });
   } else {
     res.status(400);
@@ -64,11 +65,16 @@ const loginUser = asyncHandler(async (req, res) => {
       email: user.email,
       role: user.role,
       token: generateToken(user._id),
+      message:"Login successful"
     });
   } else {
     res.status(401); // Unauthorized
     throw new Error('Invalid email or password');
   }
 });
+const userController={
+  registerUser,
+  loginUser
+}
 
-module.exports = { registerUser, loginUser };
+export default userController;
