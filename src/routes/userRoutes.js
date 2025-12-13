@@ -1,11 +1,15 @@
 // src/routes/userRoutes.js
 import { Router } from 'express';
-import  userController from '../controllers/userController.js';
+import userController from '../controllers/userController.js';
+import { protect } from '../middleware/authMiddleware.js';
+
 const router = Router();
 
-// Route for /api/users/register
+// Public routes
 router.post('/register', userController.registerUser);
-
-// Route for /api/users/login
 router.post('/login', userController.loginUser);
+
+// Protected routes (require token)
+router.get('/profile', protect, userController.getProfile);
+
 export default router;

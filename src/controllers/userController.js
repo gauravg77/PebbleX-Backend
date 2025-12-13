@@ -3,9 +3,16 @@ import asyncHandler from 'express-async-handler';
 import User from '../models/user.js'; // User model
 import generateToken from '../utils/generateTokens.js';
 
-// @desc    Register a new user (Supplier or Vendor)
-// @route   POST /api/users/register
-// @access  Public
+// @desc    Get user profile (protected)
+// @route   GET /api/v1/profile
+// @access  Private
+const getProfile = asyncHandler(async (req, res) => {
+  res.json({
+    message: 'User profile retrieved',
+    user: req.user,
+  });
+});
+
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, role, phone, address } = req.body;
 
@@ -72,9 +79,10 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new Error('Invalid email or password');
   }
 });
-const userController={
+const userController = {
   registerUser,
-  loginUser
-}
+  loginUser,
+  getProfile,
+};
 
 export default userController;
