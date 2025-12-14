@@ -24,3 +24,4 @@ Error: Cannot find module 'D:\Microsoft VS Code\PebbleX_Backend\PebbleX-Backend\
  3) MongoDB Connection Error: querySrv ENOTFOUND _mongodb._tcp.357_ ( fixed by repasting the connection string from mongodb atlas)
  4)MongoDB Connection Error: bad auth : authentication failed (i was using @,which later replaced with %40 it worked) 
  5) Code was right but the connection was failed , which was due to the wrong api listing, which after set to 0.0.0.0 it got fixed .
+ 6) Issue arised because i wrote code in common js instead of ESM
