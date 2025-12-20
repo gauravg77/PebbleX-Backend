@@ -25,3 +25,4 @@ Error: Cannot find module 'D:\Microsoft VS Code\PebbleX_Backend\PebbleX-Backend\
  4)MongoDB Connection Error: bad auth : authentication failed (i was using @,which later replaced with %40 it worked) 
  5) Code was right but the connection was failed , which was due to the wrong api listing, which after set to 0.0.0.0 it got fixed .
  6) Issue arised because i wrote code in common js instead of ESM
+ 7)git push origin HEAD:feature/products ( use this if you commited in one branch and push it to the other desired branch)
