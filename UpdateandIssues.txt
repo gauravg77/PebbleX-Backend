@@ -25,3 +25,5 @@ Error: Cannot find module 'D:\Microsoft VS Code\PebbleX_Backend\PebbleX-Backend\
  4)MongoDB Connection Error: bad auth : authentication failed (i was using @,which later replaced with %40 it worked) 
  5) Code was right but the connection was failed , which was due to the wrong api listing, which after set to 0.0.0.0 it got fixed .
  6) Issue arised because i wrote code in common js instead of ESM
+ 7)The "Order not found" error occurred because the controller was incorrectly using req.params.id instead of req.params.orderId, so MongoDB was searching with undefined. I fixed it by updating the controller to use Order.findById(req.params.orderId) for all relevant functions, ensuring the route parameter matched
+ 8)The “Order not found” error occurred because the controller was incorrectly checking req.user.id instead of req.user._id, so the supplier ID comparison failed and blocked access. I fixed it by updating the check to order.supplier.toString() !== req.user._id.toString(), ensuring the logged-in supplier matches the order’s supplier before updating the status.

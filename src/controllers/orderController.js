@@ -78,3 +78,74 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+/**
+ * SUPPLIER → Approve order
+ */
+export const approveOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Only supplier of this order can approve
+    if (order.supplier.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    order.status = "approved";
+    await order.save();
+
+    res.json({ message: "Order approved", order });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * SUPPLIER → Reject order
+ */
+export const rejectOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.supplier.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    order.status = "rejected";
+    await order.save();
+
+    res.json({ message: "Order rejected", order });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const shipOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    if (order.supplier.toString() !== req.user._id.toString()) 
+      return res.status(403).json({ message: "Not authorized" });
+
+    if (order.status !== "approved") 
+      return res.status(400).json({ message: "Order must be approved before shipping" });
+
+    order.status = "shipped";
+    await order.save();
+
+    res.json({ message: "Order shipped", order });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

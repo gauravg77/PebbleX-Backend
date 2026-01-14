@@ -15,14 +15,18 @@ export const protect = async (req, res, next) => {
       req.user = await UserModel.findById(decoded.id).select('-password');
 
       if (!req.user) {
+        console.log('User not found in database');
         return res.status(404).json({ message: 'User not found' });
       }
 
+      console.log('User authenticated:', req.user);
       next();
     } catch (error) {
+      console.log('JWT verification failed:', error.message);
       res.status(401).json({ message: 'Not authorized to access this route' });
     }
   } else {
+    console.log('No token provided');
     res.status(401).json({ message: 'No token provided' });
   }
 };
