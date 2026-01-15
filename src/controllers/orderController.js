@@ -1,0 +1,183 @@
+import Order from "../models/order.js";
+import Product from "../models/product.js";
+
+export const placeOrder = async (req, res) => {
+  try {
+    if (req.user.role !== "vendor") {
+      return res.status(403).json({ message: "Only vendors can place orders" });
+    }
+
+    const { supplier, items } = req.body;
+
+    const order = await Order.create({
+      vendor: req.user._id,
+      supplier,
+      items
+    });
+
+    res.status(201).json(order);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// Vendor: view own orders
+export const getVendorOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ vendor: req.user._id })
+      .populate("supplier", "name email")
+      .populate("items.product", "name price")
+      .sort({ createdAt: -1 });
+
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Supplier: view received orders
+export const getSupplierOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ supplier: req.user._id })
+      .populate("vendor", "name email")
+      .populate("items.product", "name price")
+      .sort({ createdAt: -1 });
+
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export const updateOrderStatus = async (req, res) => {
+  try {
+    if (req.user.role !== "supplier") {
+      return res.status(403).json({ message: "Only suppliers can update orders" });
+    }
+
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    if (!["approved", "rejected", "shipped"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.supplier.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+/**
+ * SUPPLIER → Approve order
+ */
+export const approveOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Only supplier of this order can approve
+    if (order.supplier.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    order.status = "approved";
+    await order.save();
+
+    res.json({ message: "Order approved", order });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * SUPPLIER → Reject order
+ */
+export const rejectOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.supplier.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    order.status = "rejected";
+    await order.save();
+
+    res.json({ message: "Order rejected", order });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * SUPPLIER → Ships order
+ */
+export const shipOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId).populate("items.product");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.supplier.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    if (order.status !== "approved") {
+      return res.status(400).json({
+        message: "Order must be approved before shipping"
+      });
+    }
+
+    //Reduce stock
+    for (const item of order.items) {
+      const product = await Product.findById(item.product._id);
+
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      if (product.stock < item.quantity) {
+        return res.status(400).json({
+          message: `Not enough stock for ${product.name}`
+        });
+      }
+
+      product.stock -= item.quantity;
+      product.sold += item.quantity;
+      
+      await product.save();
+    }
+
+    order.status = "shipped";
+    await order.save();
+
+    res.json({
+      message: "Order shipped and stock updated",
+      order
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
