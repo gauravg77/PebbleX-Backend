@@ -129,22 +129,54 @@ export const rejectOrder = async (req, res) => {
   }
 };
 
+/**
+ * SUPPLIER → Ships order
+ */
 export const shipOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.orderId);
+    const order = await Order.findById(req.params.orderId).populate("items.product");
 
-    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-    if (order.supplier.toString() !== req.user._id.toString()) 
+    if (order.supplier.toString() !== req.user.id) {
       return res.status(403).json({ message: "Not authorized" });
+    }
 
-    if (order.status !== "approved") 
-      return res.status(400).json({ message: "Order must be approved before shipping" });
+    if (order.status !== "approved") {
+      return res.status(400).json({
+        message: "Order must be approved before shipping"
+      });
+    }
+
+    //Reduce stock
+    for (const item of order.items) {
+      const product = await Product.findById(item.product._id);
+
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      if (product.stock < item.quantity) {
+        return res.status(400).json({
+          message: `Not enough stock for ${product.name}`
+        });
+      }
+
+      product.stock -= item.quantity;
+      product.sold += item.quantity;
+      
+      await product.save();
+    }
 
     order.status = "shipped";
     await order.save();
 
-    res.json({ message: "Order shipped", order });
+    res.json({
+      message: "Order shipped and stock updated",
+      order
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
