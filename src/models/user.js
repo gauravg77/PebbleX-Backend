@@ -18,13 +18,18 @@ const ModelSchema = new mongoose.Schema(
       required: true
     },
 
-  role: {
+ role: {
   type: String,
-  enum: ["supplier", "vendor", "admin"],
-  default: "vendor"
+  enum: ["SUPPLIER", "VENDOR", "ADMIN"],
+  default: "VENDOR",
+  required: true
+},
+isActive: {
+  type: Boolean,
+  default: true
 },
 
-    phone: {
+ phone: {
       type: Number,
       default: null
     },

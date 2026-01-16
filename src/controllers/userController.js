@@ -50,7 +50,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(400);
-    throw new Error('Invalid user data');
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -76,7 +76,7 @@ const loginUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(401); // Unauthorized
-    throw new Error('Invalid email or password');
+    res.status(500).json({ message: err.message });
   }
 });
 const userController = {
