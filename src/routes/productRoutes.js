@@ -4,7 +4,8 @@ import {
   addProduct,
   getProducts,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getLowStockProducts
 } from '../controllers/productController.js';
 
 import { protect } from '../middleware/authMiddleware.js';
@@ -16,5 +17,8 @@ router.delete('/:id', protect, deleteProduct);
 
 // Public - get all products
 router.get('/', getProducts);
+
+// Supplier - get low stock products
+router.get("/low-stock", protect, getLowStockProducts);
 
 export default router;

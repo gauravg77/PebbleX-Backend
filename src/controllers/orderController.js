@@ -20,6 +20,8 @@ export const placeOrder = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
 // Vendor: view own orders
 export const getVendorOrders = async (req, res) => {
   try {
@@ -54,6 +56,7 @@ export const getVendorOrders = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Supplier: view received orders
 export const getSupplierOrders = async (req, res) => {
@@ -179,6 +182,14 @@ export const shipOrder = async (req, res) => {
       product.sold += item.quantity;
       
       await product.save();
+
+
+      // LOW STOCK ALERT CHECK
+if (product.stock <= product.lowStockThreshold) {
+  console.log(
+    `LOW STOCK ALERT: ${product.name} (${product.stock} left)`
+  );
+}
     }
 
     order.status = "shipped";

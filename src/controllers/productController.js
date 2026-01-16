@@ -52,3 +52,20 @@ export const deleteProduct = async (req, res) => {
   await product.deleteOne();
   res.json({ message: 'Product deleted' });
 };
+
+
+export const getLowStockProducts = async (req, res) => {
+  try {
+    const products = await Product.find({
+      supplier: req.user.id,
+      $expr: { $lte: ["$stock", "$lowStockThreshold"] }
+    }).sort({ stock: 1 });
+
+    res.json({
+      count: products.length,
+      products
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
