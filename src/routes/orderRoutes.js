@@ -17,7 +17,7 @@ const router = express.Router();
 /**
  * Vendor places order
  */
-router.post("/", protect, roleMiddleware("vendor"), placeOrder);
+router.post("/", protect, roleMiddleware("VENDOR"), placeOrder);
 
 /**
  * Vendor views own orders
@@ -25,7 +25,7 @@ router.post("/", protect, roleMiddleware("vendor"), placeOrder);
 router.get(
   "/vendor",
   protect,
-  roleMiddleware("vendor"),
+  roleMiddleware("VENDOR"),
   getVendorOrders
 );
 
@@ -35,7 +35,7 @@ router.get(
 router.get(
   "/supplier",
   protect,
-  roleMiddleware("supplier"),
+  roleMiddleware("SUPPLIER"),
   getSupplierOrders
 );
 
@@ -45,7 +45,7 @@ router.get(
 router.patch(
   "/:orderId/approve",
   protect,
-  roleMiddleware("supplier"),
+  roleMiddleware("SUPPLIER"),
   approveOrder
 );
 
@@ -55,7 +55,7 @@ router.patch(
 router.patch(
   "/:orderId/reject",
   protect,
-  roleMiddleware("supplier"),
+  roleMiddleware("SUPPLIER"),
   rejectOrder
 );
 
@@ -65,7 +65,7 @@ router.patch(
 router.patch(
   "/:orderId/ship",
   protect,
-  roleMiddleware("supplier"),
+  roleMiddleware("SUPPLIER"),
   shipOrder
 );
 // Vendor cancels order
