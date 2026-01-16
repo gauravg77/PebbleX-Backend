@@ -1,10 +1,7 @@
 import express from 'express';
-import productRoutes from './src/routes/productRoutes.js';
-import orderRoutes from "./src/routes/orderRoutes.js";
-import userRoutes from './src/routes/userRoutes.js';
 import  { connecttoMongoDB } from './connect.js';
 import { config } from 'dotenv';
-import adminRoutes from './src/routes/adminRoutes.js';
+import mainRoutes from './src/routes/mainRoutes.js';
 
 
 const app = express();
@@ -14,14 +11,7 @@ config();
 
 // Routes
 app.use(express.json());
-app.use("/api/orders", orderRoutes);
-app.use('/api/v1', userRoutes);
-app.use("/api/v1/products", productRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/admin", adminRoutes);
-
-
-
+app.use("/api/v1",mainRoutes);
 // MongoDB connection
 connecttoMongoDB(process.env.MONGODB_URL)
     .then(() => {
