@@ -11,16 +11,17 @@ export const addProduct = async (req, res) => {
       ...req.body
     });
 
-    res.status(201).json(product);
+    res.status(201).json(
+      {success:true, product,message:'Product added successfully' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success:false, message: err.message });
   }
 };
 
 
 export const getProducts = async (req, res) => {
   const products = await Product.find().populate('supplier', 'name');
-  res.json(products);
+  res.json({success:true, products,message:'Products fetched successfully' });
 };
 
 
@@ -36,7 +37,7 @@ export const updateProduct = async (req, res) => {
   Object.assign(product, req.body);
   await product.save();
 
-  res.json(product);
+  res.json({success:true, product,message:'Product updated successfully' });
 };
 
 
@@ -50,7 +51,7 @@ export const deleteProduct = async (req, res) => {
   }
 
   await product.deleteOne();
-  res.json({ message: 'Product deleted' });
+  res.json({success:true, message: 'Product deleted' });
 };
 
 
@@ -62,10 +63,15 @@ export const getLowStockProducts = async (req, res) => {
     }).sort({ stock: 1 });
 
     res.json({
+      success:true,
       count: products.length,
-      products
+      products,
+      message: 'Low stock products fetched successfully'
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success:false,
+      message: error.message
+  });
   }
 };

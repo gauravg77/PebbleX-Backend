@@ -11,18 +11,19 @@ import {
 
 import { protect } from "../middleware/authMiddleware.js";
 import roleMiddleware from "../middleware/roleMiddleware.js";
+import order from "../models/order.js";
 
-const router = express.Router();
+const orderRoutes = express.Router();
 
 /**
  * Vendor places order
  */
-router.post("/", protect, roleMiddleware("vendor"), placeOrder);
+orderRoutes.post("/", protect, roleMiddleware("vendor"), placeOrder);
 
 /**
  * Vendor views own orders
  */
-router.get(
+orderRoutes.get(
   "/vendor",
   protect,
   roleMiddleware("vendor"),
@@ -32,7 +33,7 @@ router.get(
 /**
  * Supplier views received orders
  */
-router.get(
+orderRoutes.get(
   "/supplier",
   protect,
   roleMiddleware("supplier"),
@@ -42,7 +43,7 @@ router.get(
 /**
  * Supplier approves order
  */
-router.patch(
+orderRoutes.patch(
   "/:orderId/approve",
   protect,
   roleMiddleware("supplier"),
@@ -52,7 +53,7 @@ router.patch(
 /**
  * Supplier rejects order
  */
-router.patch(
+orderRoutes.patch(
   "/:orderId/reject",
   protect,
   roleMiddleware("supplier"),
@@ -62,14 +63,14 @@ router.patch(
 /**
  * Supplier ships order
  */
-router.patch(
+orderRoutes.patch(
   "/:orderId/ship",
   protect,
   roleMiddleware("supplier"),
   shipOrder
 );
 // Vendor cancels order
-router.put("/:orderId/cancel", protect, cancelOrder);
+orderRoutes.put("/:orderId/cancel", protect, cancelOrder);
 
 
-export default router;
+export default orderRoutes;

@@ -7,7 +7,11 @@ import Product from "../models/product.js";
  */
 export const getAllUsers = async (req, res) => {
   const users = await User.find().select("-password");
-  res.json(users);
+  res.json({
+    success: true,
+    users,
+    message: "Users fetched successfully"
+  });
 };
 
 /**
@@ -17,13 +21,17 @@ export const toggleUserStatus = async (req, res) => {
   const user = await User.findById(req.params.id);
 
   if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    return res.status(404).json({ 
+      success: false,
+      message: "User not found"
+     });
   }
 
   user.isActive = !user.isActive;
   await user.save();
 
   res.json({
+    success: true,
     message: `User ${user.isActive ? "unblocked" : "blocked"}`,
     user
   });
@@ -37,7 +45,11 @@ export const getAllOrders = async (reqz, res) => {
     .populate("vendor supplier", "name email")
     .populate("items.product", "name price");
 
-  res.json(orders);
+  res.json({
+    success: true,
+    orders,
+    message: "Orders fetched successfully"
+  });
 };
 
 /**
@@ -45,5 +57,9 @@ export const getAllOrders = async (reqz, res) => {
  */
 export const getLowStockProducts = async (req, res) => {
   const products = await Product.find({ stock: { $lte: 5 } });
-  res.json(products);
+  res.json({
+    success: true,
+    products,
+    message: "Low stock products fetched successfully"
+  });
 };

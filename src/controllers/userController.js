@@ -9,11 +9,9 @@ import generateToken from '../utils/generateTokens.js';
 const getProfile = asyncHandler(async (req, res) => {
   if (req.user) {
     return res.json({
-      _id: req.user._id,
-      name: req.user.name,
-      email: req.user.email,
-      role: req.user.role,
-      isActive: req.user.isActive,
+      success: true,
+      user,
+      "message": "Profile fetched successfully",
     });
   } else {
     // Return JSON instead of throwing error
@@ -51,10 +49,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (user) {
     return res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
+      success: true,
+      user,
       token: generateToken(user._id),
       message: 'User registered successfully',
     });
@@ -85,10 +81,8 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     return res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
+      success: true,
+      user,
       token: generateToken(user._id),
       message: "Login successful"
     });

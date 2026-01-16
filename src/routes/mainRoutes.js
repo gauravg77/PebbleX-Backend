@@ -3,6 +3,8 @@ import authRoutes from "./userRoutes.js";
 import orderRoutes from "./orderRoutes.js";
 import productRoutes from "./productRoutes.js";
 import adminRoutes from "./adminRoutes.js"; // Added to include your admin features
+import { adminOnly } from "../middleware/adminMiddleware.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const mainRoutes = Router();
 
@@ -16,6 +18,6 @@ mainRoutes.use('/product', productRoutes);
 mainRoutes.use('/order', orderRoutes);
 
 // Admin routes (User management/Low stock/All orders)
-mainRoutes.use('/admin', adminRoutes);
+mainRoutes.use('/admin',protect, adminOnly, adminRoutes);
 
 export default mainRoutes;

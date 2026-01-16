@@ -1,5 +1,4 @@
-import express from 'express';
-const router = express.Router();
+import  { Router } from 'express';
 import {
   addProduct,
   getProducts,
@@ -10,15 +9,16 @@ import {
 
 import { protect } from '../middleware/authMiddleware.js';
 
+const productRoutes = Router();
 // Supplier/Admin only - protected
-router.post('/', protect, addProduct);
-router.put('/:id', protect, updateProduct);
-router.delete('/:id', protect, deleteProduct);
+productRoutes.post('/', protect, addProduct);
+productRoutes.put('/:id', protect, updateProduct);
+productRoutes.delete('/:id', protect, deleteProduct);
 
 // Public - get all products
-router.get('/', getProducts);
+productRoutes.get('/', getProducts);
 
 // Supplier - get low stock products
-router.get("/low-stock", protect, getLowStockProducts);
+productRoutes.get("/low-stock", protect, getLowStockProducts);
 
-export default router;
+export default productRoutes;

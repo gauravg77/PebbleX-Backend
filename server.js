@@ -5,9 +5,9 @@ import mainRoutes from './src/routes/mainRoutes.js';
 
 
 const app = express();
-const port = process.env.PORT || 5000;
 
 config();
+const port = process.env.PORT  || 3000;
 
 // Routes
 app.use(express.json());

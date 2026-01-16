@@ -3,13 +3,13 @@ import { Router } from 'express';
 import userController from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
-const userrouter = Router();
+const userRoutes = Router();
 
 // Public routes
-userrouter.post('/register', userController.registerUser);
-userrouter.post('/login', userController.loginUser);
+userRoutes.post('/register', userController.registerUser);
+userRoutes.post('/login', userController.loginUser);
 
 // Protected routes (require token)
-userrouter.get('/profile', protect, userController.getProfile);
+userRoutes.get('/profile', protect, userController.getProfile);
 
-export default userrouter;
+export default userRoutes;

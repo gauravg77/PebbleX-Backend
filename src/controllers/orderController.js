@@ -15,9 +15,16 @@ export const placeOrder = async (req, res) => {
       items
     });
 
-    res.status(201).json({order,message:"Order placed successfully"});
+    res.status(201).json({
+      success:true,
+      order,
+      message:"Order placed successfully"
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success:false,
+      message: error.message
+     });
   }
 };
 
@@ -49,11 +56,14 @@ export const getVendorOrders = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.json({
+      success:true,
       count: orders.length,
       orders
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success:false,
+      message: error.message });
   }
 };
 
@@ -85,11 +95,15 @@ export const getSupplierOrders = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.json({
+      success:true,
       count: orders.length,
-      orders
+      orders,
+      "message":"Orders fetched successfully"
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success:false,
+      message: error.message });
   }
 };
 
@@ -113,9 +127,16 @@ export const approveOrder = async (req, res) => {
     order.status = "approved";
     await order.save();
 
-    res.json({ message: "Order approved", order });
+    res.json({ 
+      success:true,
+      message: "Order approved", 
+      order 
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success:false,
+      message: error.message
+     });
   }
 };
 
@@ -137,9 +158,15 @@ export const rejectOrder = async (req, res) => {
     order.status = "rejected";
     await order.save();
 
-    res.json({ message: "Order rejected", order });
+    res.json({ 
+      success:true,
+      order,
+      message: "Order rejected", 
+     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success:false,
+      message: error.message });
   }
 };
 
@@ -196,11 +223,14 @@ if (product.stock <= product.lowStockThreshold) {
     await order.save();
 
     res.json({
+      success:true,
       message: "Order shipped and stock updated",
       order
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success:false,  
+      message: error.message });
   }
 };
 
@@ -231,10 +261,13 @@ export const cancelOrder = async (req, res) => {
     await order.save();
 
     res.json({
+      success:true,
       message: "Order cancelled successfully",
       order
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success:false,
+      message: error.message });
   }
 };

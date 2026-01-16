@@ -1,4 +1,4 @@
-import express from "express";
+import  { Router } from "express";
 
 import {
   getAllUsers,
@@ -7,17 +7,15 @@ import {
   getLowStockProducts
 } from "../controllers/adminController.js";
 
-import { protect } from "../middleware/authMiddleware.js";
-import { adminOnly } from "../middleware/adminMiddleware.js";
 
-const router = express.Router();
 
-router.use(protect, adminOnly);
+const adminRoutes = Router();
 
-router.get("/users", getAllUsers);
-router.patch("/users/:id/toggle-status", toggleUserStatus);
-router.get("/orders", getAllOrders);
-router.get("/low-stock", getLowStockProducts);
-router.get("/products/low-stock", getLowStockProducts);
 
-export default router;
+adminRoutes.get("/users", getAllUsers);
+adminRoutes.patch("/users/:id/toggle-status", toggleUserStatus);
+adminRoutes.get("/orders", getAllOrders);
+adminRoutes.get("/low-stock", getLowStockProducts);
+adminRoutes.get("/products/low-stock", getLowStockProducts);
+
+export default adminRoutes;
