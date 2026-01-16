@@ -10,7 +10,7 @@ const getProfile = asyncHandler(async (req, res) => {
   if (req.user) {
     return res.json({
       success: true,
-      user,
+      user: req.user,
       "message": "Profile fetched successfully",
     });
   } else {
