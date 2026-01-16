@@ -1,30 +1,44 @@
 // src/controllers/userController.js
 import asyncHandler from 'express-async-handler';
-import User from '../models/user.js'; // User model
+import User from '../models/user.js';
 import generateToken from '../utils/generateTokens.js';
 
-// @desc    Get user profile (protected)
-// @route   GET /api/v1/profile
-// @access  Private
+/**
+ * @desc    Get user profile (protected)
+ */
 const getProfile = asyncHandler(async (req, res) => {
-  res.json({
-    message: 'User profile retrieved',
-    user: req.user,
-  });
+  if (req.user) {
+    return res.json({
+      _id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      isActive: req.user.isActive,
+    });
+  } else {
+    // Return JSON instead of throwing error
+    return res.status(404).json({
+      success: false,
+      message: 'User not found'
+    });
+  }
 });
 
+/**
+ * @desc    Register new user
+ */
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, role, phone, address } = req.body;
 
-  // 1. Check if user already exists
   const userExists = await User.findOne({ email });
 
   if (userExists) {
-    res.status(400);
-    throw new Error('User already exists');
+    return res.status(400).json({
+      success: false,
+      message: 'User already exists'
+    });
   }
 
-  // 2. Create the User (password hashing happens in the model's .pre('save') middleware)
   const user = await User.create({
     name,
     email,
@@ -32,15 +46,11 @@ const registerUser = asyncHandler(async (req, res) => {
     role,
     phone,
     address,
+    isActive: true,
   });
 
   if (user) {
-    // 3. Create the corresponding Supplier or Vendor profile
-    // If you have Supplier or Vendor models, create their profiles here.
-    // Currently omitted because `Supplier` and `Vendor` models are not present.
-    
-    // 4. Send success response with token
-    res.status(201).json({
+    return res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
@@ -49,36 +59,48 @@ const registerUser = asyncHandler(async (req, res) => {
       message: 'User registered successfully',
     });
   } else {
-    res.status(400);
-    res.status(500).json({ message: err.message });
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid user data'
+    });
   }
 });
 
-// @desc    Authenticate user & get token
-// @route   POST /api/users/login
-// @access  Public
+/**
+ * @desc    Authenticate user & get token
+ */
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // 1. Find user
   const user = await User.findOne({ email });
 
-  // 2. Check password
   if (user && (await user.matchPassword(password))) {
-    // 3. Send success response with token
-    res.json({
+    
+    // SECURITY: Prevent blocked users from logging in
+    if (user.isActive === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been deactivated. Please contact an administrator.'
+      });
+    }
+
+    return res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
       token: generateToken(user._id),
-      message:"Login successful"
+      message: "Login successful"
     });
   } else {
-    res.status(401); // Unauthorized
-    res.status(500).json({ message: err.message });
+    // Return JSON for invalid credentials
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid email or password'
+    });
   }
 });
+
 const userController = {
   registerUser,
   loginUser,

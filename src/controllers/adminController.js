@@ -32,7 +32,7 @@ export const toggleUserStatus = async (req, res) => {
 /**
  * ADMIN → View all orders
  */
-export const getAllOrders = async (req, res) => {
+export const getAllOrders = async (reqz, res) => {
   const orders = await Order.find()
     .populate("vendor supplier", "name email")
     .populate("items.product", "name price");
