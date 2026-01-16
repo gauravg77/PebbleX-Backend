@@ -5,7 +5,8 @@ import {
   getSupplierOrders,
   approveOrder,
   rejectOrder,
-  shipOrder
+  shipOrder,
+  cancelOrder
 } from "../controllers/orderController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -67,5 +68,8 @@ router.patch(
   roleMiddleware("supplier"),
   shipOrder
 );
+// Vendor cancels order
+router.put("/:orderId/cancel", protect, cancelOrder);
+
 
 export default router;

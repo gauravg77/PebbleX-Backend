@@ -181,3 +181,38 @@ export const shipOrder = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+/**
+ * VENDOR → Cancel order
+ */
+export const cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Only vendor who placed order can cancel
+    if (order.vendor.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    // Can only cancel pending orders
+    if (order.status !== "pending") {
+      return res.status(400).json({
+        message: "Only pending orders can be cancelled"
+      });
+    }
+
+    order.status = "cancelled";
+    await order.save();
+
+    res.json({
+      message: "Order cancelled successfully",
+      order
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
