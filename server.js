@@ -2,12 +2,18 @@ import express from 'express';
 import  { connecttoMongoDB } from './connect.js';
 import { config } from 'dotenv';
 import mainRoutes from './src/routes/mainRoutes.js';
-
+import cors from 'cors';
 
 const app = express();
 
 config();
 const port = process.env.PORT  || 3000;
+
+// CORS configuration
+app.use(cors({
+    origin: 'http://localhost:5174',
+    credentials: true
+}));
 
 // Routes
 app.use(express.json());
