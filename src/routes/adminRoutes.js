@@ -17,7 +17,6 @@ router.use(protect, adminOnly);
 router.get("/users", getAllUsers);
 router.patch("/users/:id/toggle-status", toggleUserStatus);
 router.get("/orders", getAllOrders);
-router.get("/low-stock", getLowStockProducts);
 router.get("/products/low-stock", getLowStockProducts);
 
 export default router;

@@ -14,7 +14,11 @@ const productSchema = mongoose.Schema(
     sold: { type: Number, default: 0 },
     category: { type: String, required: true },
     sku: { type: String, unique: true, required: true },
-    image: { type: String, default: null },
+    images: { 
+  type: [String], 
+  required: [true, 'A product must have at least one image'],
+  default: [] 
+},
     rating: { type: Number, default: 0, min: 0, max: 5 },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
     lowStockThreshold: { type: Number,default: 10, min: 0}

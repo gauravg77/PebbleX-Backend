@@ -10,19 +10,29 @@ import {
 } from '../controllers/productController.js';
 
 import { protect } from '../middleware/authMiddleware.js';
+import { upload } from '../config/cloudinary.js';
 
-// Supplier/Admin only - protected
-router.post('/', protect, addProduct);
-router.put('/:id', protect, updateProduct);
+// --- Protected Routes (Supplier/Admin) ---
+
+// POST: Add new product with up to 5 images
+router.post('/', protect, upload.array('images', 5), addProduct);
+
+// PUT: Update product (allows updating images too)
+router.put('/:id', protect, upload.array('images', 5), updateProduct);
+
+// DELETE: Remove product
 router.delete('/:id', protect, deleteProduct);
 
-// Supplier - get low stock products
+// GET: Supplier specific low stock alerts
 router.get("/low-stock", protect, getLowStockProducts);
 
-// Product by ID
+
+// --- Public Routes ---
+
+// GET: Product by ID
 router.get('/:id', getProductById);
 
-// Public - get all products
+// GET: All products
 router.get('/', getProducts);
 
 export default router;
