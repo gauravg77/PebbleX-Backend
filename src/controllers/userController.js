@@ -203,13 +203,75 @@ const verifyResetToken = asyncHandler(async (req, res) => {
   });
 });
 
+
+export const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    // 1. Get user from DB (must include password field)
+    const user = await User.findById(req.user._id).select('+password');
+
+    // 2. Check if current password is correct
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Current password is incorrect' });
+    }
+
+    // 3. Update to new password
+    user.password = newPassword;
+    await user.save(); // This will trigger your pre-save password hashing
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Password updated successfully' 
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Update basic profile info (name/email)
+export const updateMe = async (req, res) => {
+  try {
+    // 1. Prevent password updates in this route
+    if (req.body.password || req.body.currentPassword) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'This route is not for password updates. Please use /update-my-password.' 
+      });
+    }
+
+    // 2. Filter the body to only allow specific fields
+    const filteredBody = {};
+    if (req.body.name) filteredBody.name = req.body.name;
+    if (req.body.email) filteredBody.email = req.body.email;
+
+    // 3. Update user document
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id, 
+      filteredBody, 
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: updatedUser
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 const userController = {
   registerUser,
   loginUser,
   getProfile,
   forgotPassword,
   resetPassword,
-  verifyResetToken
+  verifyResetToken,
+  updatePassword,
+  updateMe
 };
 
 export default userController;

@@ -1,9 +1,10 @@
 import Product from '../models/product.js';
 
+// @desc    Add a new product
 export const addProduct = async (req, res) => {
   try {
-    if (req.user.role !== 'supplier') {
-      return res.status(403).json({ message: 'Only suppliers can add products' });
+    if (req.user.role !== 'SUPPLIER') {
+      return res.status(403).json({ success: false, message: 'Only suppliers can add products' });
     }
 
     const product = await Product.create({
@@ -11,61 +12,119 @@ export const addProduct = async (req, res) => {
       ...req.body
     });
 
-    res.status(201).json(product);
+    res.status(201).json({ 
+      success: true, 
+      message: 'Product added successfully', 
+      product 
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-
+// @desc    Get all products
 export const getProducts = async (req, res) => {
-  const products = await Product.find().populate('supplier', 'name');
-  res.json(products);
+  try {
+    const products = await Product.find().populate('supplier', 'name');
+    res.json({ 
+      success: true, 
+      count: products.length, 
+      products 
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
 
+// @desc    Get single product by ID
+export const getProductById = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id).populate('supplier', 'name email');
+    
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    
+    res.json({ success: true, product });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Invalid ID format' });
+  }
+};
 
+// @desc    Update product (Ownership check included)
 export const updateProduct = async (req, res) => {
-  const product = await Product.findById(req.params.id);
+  try {
+    const product = await Product.findById(req.params.id);
 
-  if (!product) return res.status(404).json({ message: 'Product not found' });
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
-  if (product.supplier.toString() !== req.user._id.toString()) {
-    return res.status(403).json({ message: 'Not your product' });
+    if (product.supplier.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not your product' });
+    }
+
+    Object.assign(product, req.body);
+    await product.save();
+
+    res.json({ 
+      success: true, 
+      message: 'Product updated successfully', 
+      product 
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
-
-  Object.assign(product, req.body);
-  await product.save();
-
-  res.json(product);
 };
 
-
+// @desc    Delete product (Ownership check fixed)
 export const deleteProduct = async (req, res) => {
-  const product = await Product.findById(req.params.id);
+  try {
+    const product = await Product.findById(req.params.id);
 
-  if (!product) return res.status(404).json({ message: 'Product not found' });
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
-  if (product.supplier._id.toString() !== req.user._id.toString()) {
-    return res.status(403).json({ message: 'Not authorized' });
+    // Using .toString() to ensure the comparison works correctly
+    if (product.supplier.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+
+    await product.deleteOne();
+    res.json({ success: true, message: 'Product deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
-
-  await product.deleteOne();
-  res.json({ message: 'Product deleted' });
 };
 
-
+// @desc    Get low stock items (Supplier see their own, Admin sees all)
 export const getLowStockProducts = async (req, res) => {
   try {
-    const products = await Product.find({
-      supplier: req.user.id,
-      $expr: { $lte: ["$stock", "$lowStockThreshold"] }
-    }).sort({ stock: 1 });
+    // 1. Role Check: Only SUPPLIER or ADMIN allowed
+    const allowedRoles = ['SUPPLIER', 'ADMIN'];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Access denied.' 
+      });
+    }
+
+    // 2. Build Query: If Supplier, filter by their ID. If Admin, empty filter (see all).
+    let query = { $expr: { $lte: ["$stock", "$lowStockThreshold"] } };
+    
+    if (req.user.role === 'SUPPLIER') {
+      query.supplier = req.user._id;
+    }
+
+    // 3. Execute Query
+    const products = await Product.find(query)
+      .populate('supplier', 'name email')
+      .sort({ stock: 1 });
 
     res.json({
+      success: true,
+      message: req.user.role === 'ADMIN' ? 'Admin view: All low stock items' : 'Supplier view: Your low stock items',
       count: products.length,
       products
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };

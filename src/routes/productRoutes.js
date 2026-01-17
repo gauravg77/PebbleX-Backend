@@ -5,7 +5,8 @@ import {
   getProducts,
   updateProduct,
   deleteProduct,
-  getLowStockProducts
+  getLowStockProducts,
+  getProductById
 } from '../controllers/productController.js';
 
 import { protect } from '../middleware/authMiddleware.js';
@@ -15,10 +16,13 @@ router.post('/', protect, addProduct);
 router.put('/:id', protect, updateProduct);
 router.delete('/:id', protect, deleteProduct);
 
-// Public - get all products
-router.get('/', getProducts);
-
 // Supplier - get low stock products
 router.get("/low-stock", protect, getLowStockProducts);
+
+// Product by ID
+router.get('/:id', getProductById);
+
+// Public - get all products
+router.get('/', getProducts);
 
 export default router;
