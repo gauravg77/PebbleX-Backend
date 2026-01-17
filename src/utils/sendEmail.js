@@ -23,7 +23,8 @@ const sendEmail = async (options) => {
   try {
     console.log("Sending email to:", recipientEmail);
     const result = await transporter.sendMail(mailOptions);
-    console.log("Email sent successfully!", result);
+const info = await transporter.sendMail(mailOptions);
+console.log(`Email sent successfully to: ${info.accepted[0]}`);
     return { success: true, result };
   } catch (error) {
     console.error("Error sending email:", error.message);
