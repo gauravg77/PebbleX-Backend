@@ -7,7 +7,6 @@ const ModelSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    
     email: {
       type: String,
       required: true,
@@ -17,28 +16,28 @@ const ModelSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-
- role: {
-  type: String,
-  enum: ["SUPPLIER", "VENDOR", "ADMIN"],
-  default: "VENDOR",
-  required: true
-},
-isActive: {
-  type: Boolean,
-  default: true
-},
-
- phone: {
+    role: {
+      type: String,
+      enum: ["SUPPLIER", "VENDOR", "ADMIN"],
+      default: "VENDOR",
+      required: true
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    },
+    phone: {
       type: Number,
       default: null
     },
     address: {
       type: String,
-      required:true
+      required: true
     },
+    // Added for Password Reset Logic
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
-  //creates the created and updated date aytomatically
   {
     timestamps: true
   }
@@ -61,6 +60,6 @@ ModelSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcryptjs.compare(enteredPassword, this.password);
 };
 
-const UserModel = mongoose.model("User", ModelSchema); // Corrected this line
+const UserModel = mongoose.model("User", ModelSchema);
 
-export default UserModel
+export default UserModel;

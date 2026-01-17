@@ -11,5 +11,6 @@ userrouter.post('/login', userController.loginUser);
 
 // Protected routes (require token)
 userrouter.get('/profile', protect, userController.getProfile);
-
+userrouter.post('/forgot-password', userController.forgotPassword);
+userrouter.patch('/reset-password/:token', userController.resetPassword);
 export default userrouter;
