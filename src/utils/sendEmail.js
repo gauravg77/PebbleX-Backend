@@ -10,12 +10,12 @@ const sendEmail = async (options) => {
     }
   });
 
-  // For testing: use your verified email as the recipient
+  // For testing: using verified email as the recipient
   const recipientEmail = process.env.VERIFIED_EMAIL || "ghimiregaurav357@gmail.com";
 
   const mailOptions = {
     from: process.env.EMAIL_FROM || "onboarding@resend.dev",
-    to: recipientEmail, // Use verified email for testing
+    to: recipientEmail, // Using verified email for testing
     subject: options.subject,
     text: options.message
   };

@@ -140,3 +140,28 @@ export const getLowStockProducts = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+export const searchProducts = async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    // ==========================================
+    // 1. SEARCH LOGIC (Regex for Autofill)
+    // ==========================================
+    const products = await Product.find({
+      name: { $regex: query, $options: "i" }, // "i" makes it case-insensitive
+    })
+      .select("name _id price category images") // Only return necessary fields for speed
+      .limit(10); // Limit results for better performance
+
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Search failed" });
+  }
+};
