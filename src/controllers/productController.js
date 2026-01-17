@@ -145,23 +145,50 @@ export const getLowStockProducts = async (req, res) => {
 
 export const searchProducts = async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query, category, minPrice, maxPrice, sortBy, inStock } = req.query;
 
-    if (!query) {
-      return res.status(400).json({ message: "Search query is required" });
+    // 1. Build Filter Object
+    let filter = {};
+
+    // Text search (by name)
+    if (query) {
+      filter.name = { $regex: query, $options: "i" };
     }
 
-    // ==========================================
-    // 1. SEARCH LOGIC (Regex for Autofill)
-    // ==========================================
-    const products = await Product.find({
-      name: { $regex: query, $options: "i" }, // "i" makes it case-insensitive
-    })
-      .select("name _id price category images") // Only return necessary fields for speed
-      .limit(10); // Limit results for better performance
+    // Category filter
+    if (category) {
+      filter.category = category;
+    }
 
-    res.json(products);
+    // Price Range filter
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    // Availability filter (Stock > 0)
+    if (inStock === "true") {
+      filter.stock = { $gt: 0 };
+    }
+
+    // 2. Build Sort Logic
+    let sortOptions = {};
+    if (sortBy === "priceLow") sortOptions.price = 1;
+    if (sortBy === "priceHigh") sortOptions.price = -1;
+    if (sortBy === "newest") sortOptions.createdAt = -1;
+
+    // 3. Execute Query
+    const products = await Product.find(filter)
+      .sort(sortOptions)
+      .select("name _id price category images stock")
+      .limit(20);
+
+    res.json({
+      count: products.length,
+      products
+    });
   } catch (error) {
-    res.status(500).json({ message: "Search failed" });
+    res.status(500).json({ message: "Search failed", error: error.message });
   }
 };
