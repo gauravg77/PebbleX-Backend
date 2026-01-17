@@ -19,6 +19,8 @@ const getProfile = asyncHandler(async (req, res) => {
         email: req.user.email,
         role: req.user.role,
         isActive: req.user.isActive,
+        phone: req.user.phone,
+        address: req.user.address
       }
     });
   } else {
