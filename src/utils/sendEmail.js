@@ -1,28 +1,34 @@
-// src/utils/sendEmail.js
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 const sendEmail = async (options) => {
-  // 1) Create a transporter
   const transporter = nodemailer.createTransport({
-    host: "sandbox.smtp.mailtrap.io",
-    port: 2525, // Standard secure port to avoid ISP blocks
+    host: "smtp.resend.com",
+    port: 587,
     auth: {
-      user: "9cd751e7300c0e",
-      pass: "52185ab29f4b1f"
-    },
-    connectionTimeout: 10000 // 10 seconds timeout
+      user: "resend",
+      pass: process.env.RESEND_API_KEY
+    }
   });
 
-  // 2) Define the email options
+  // For testing: use your verified email as the recipient
+  const recipientEmail = process.env.VERIFIED_EMAIL || "ghimiregaurav357@gmail.com";
+
   const mailOptions = {
-    from: '"PebbleX Support" <support@pebblex.com>',
-    to: options.email,
+    from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+    to: recipientEmail, // Use verified email for testing
     subject: options.subject,
-    text: options.message,
+    text: options.message
   };
 
-  // 3) Actually send the email
-  return await transporter.sendMail(mailOptions);
+  try {
+    console.log("Sending email to:", recipientEmail);
+    const result = await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully!", result);
+    return { success: true, result };
+  } catch (error) {
+    console.error("Error sending email:", error.message);
+    return { success: false, error: error.message };
+  }
 };
 
 export default sendEmail;

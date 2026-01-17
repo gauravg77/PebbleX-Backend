@@ -13,4 +13,5 @@ userrouter.post('/login', userController.loginUser);
 userrouter.get('/profile', protect, userController.getProfile);
 userrouter.post('/forgot-password', userController.forgotPassword);
 userrouter.patch('/reset-password/:token', userController.resetPassword);
+userrouter.get('/reset-password/:token', userController.verifyResetToken);
 export default userrouter;

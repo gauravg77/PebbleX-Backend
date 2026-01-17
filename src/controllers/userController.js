@@ -127,30 +127,25 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
   await user.save({ validateBeforeSave: false });
 
-  const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/reset-password/${resetToken}`;
-  const message = `You requested a password reset. Link: ${resetUrl}`;
+  const message = `You requested a password reset. Use the following code to reset your password: ${resetToken}`;
 
   // Execute email sending logic
   const emailResult = await sendEmail({ 
     email: user.email, 
     subject: 'PebbleX Password Reset', 
     message 
-  }).catch((err) => {
-    console.error("DEBUG: Email failed but here is your token for testing ->", resetToken);
-    return null; 
   });
 
-  if (emailResult) {
+  if (emailResult.success) {
     return res.status(200).json({
       success: true,
       message: 'Password reset link sent to your email'
     });
   } else {
-    // If it fails, we still return JSON. 
-    // I am NOT cleaning up the token here so you can still use the token from your terminal to test resetPassword
+    console.error("Email sending failed:", emailResult.error);
     return res.status(500).json({
       success: false,
-      message: 'Error sending email. Check terminal for the manual test token.'
+      message: 'Error sending email. Check terminal for details.'
     });
   }
 });
@@ -184,12 +179,37 @@ const resetPassword = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Verify Reset Token
+ */
+const verifyResetToken = asyncHandler(async (req, res) => {
+  const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      message: 'Token is invalid or has expired'
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: 'Token is valid. You can proceed to reset your password.'
+  });
+});
+
 const userController = {
   registerUser,
   loginUser,
   getProfile,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  verifyResetToken
 };
 
 export default userController;
