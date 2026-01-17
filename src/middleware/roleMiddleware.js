@@ -5,10 +5,18 @@ const roleMiddleware = (role) => {
       return res.status(401).json({ message: 'Not authenticated' });
     }
 
-    console.log(`User role: ${req.user.role}, Required role: ${role}`);
-    if (req.user.role !== role) {
-      return res.status(403).json({ message: 'Access denied' });
+    // Convert both to uppercase to prevent "SUPPLIER" vs "supplier" mismatch
+    const userRole = req.user.role ? req.user.role.toUpperCase() : "";
+    const requiredRole = role ? role.toUpperCase() : "";
+
+    console.log(`User role: ${userRole}, Required role: ${requiredRole}`);
+
+    if (userRole !== requiredRole) {
+      return res.status(403).json({ 
+        message: `Access denied. Role ${requiredRole} required.` 
+      });
     }
+    
     next();
   };
 };
